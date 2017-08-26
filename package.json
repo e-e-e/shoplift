@@ -1,0 +1,30 @@
+{
+  "name": "shoplift",
+  "version": "1.0.0",
+  "description": "a \"serverless\" shopify app for dynamically fucking with pricing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "serverless",
+    "shopify",
+    "aws",
+    "lambda"
+  ],
+  "author": "benjamin forster",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "aws-sdk": "^2.103.0",
+    "shopify-api-node": "^2.8.0"
+  },
+  "devDependencies": {
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-node": "^5.1.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "standard": "^10.0.3"
+  }
+}

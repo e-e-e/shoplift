@@ -1,0 +1,6 @@
+{
+  "shopName": "YOUR STORE NAME",
+  "apiKey": "YOUR SHOPIFY API KEY",
+  "password": "YOUR SHOPIFY API PASSWORD",
+  "secret": "YOUR SHOPIFY SECRET"
+}

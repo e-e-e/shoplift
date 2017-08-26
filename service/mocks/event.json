@@ -1,0 +1,37 @@
+{
+  "body": "{\"id\":10340678537,\"title\":\"Fake test of webhook\",\"body_html\":\"\",\"vendor\":\"Merch Stand, by Make or Break\",\"product_type\":\"\",\"created_at\":\"2017-08-26T14:26:27+10:00\",\"handle\":\"fake-test-of-webhook\",\"updated_at\":\"2017-08-26T14:26:27+10:00\",\"published_at\":\"2017-08-26T14:26:02+10:00\",\"template_suffix\":null,\"published_scope\":\"global\",\"tags\":\"\",\"variants\":[{\"id\":44068826185,\"product_id\":10340678537,\"title\":\"Default Title\",\"price\":\"0.00\",\"sku\":\"\",\"position\":1,\"grams\":0,\"inventory_policy\":\"deny\",\"compare_at_price\":\"333.00\",\"fulfillment_service\":\"manual\",\"inventory_management\":null,\"option1\":\"Default Title\",\"option2\":null,\"option3\":null,\"created_at\":\"2017-08-26T14:26:27+10:00\",\"updated_at\":\"2017-08-26T14:26:27+10:00\",\"taxable\":true,\"barcode\":\"\",\"image_id\":null,\"inventory_quantity\":1,\"weight\":0.0,\"weight_unit\":\"kg\",\"old_inventory_quantity\":1,\"requires_shipping\":true}],\"options\":[{\"id\":12698955913,\"product_id\":10340678537,\"name\":\"Title\",\"position\":1,\"values\":[\"Default Title\"]}],\"images\":[],\"image\":null}",
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+    "X-Shopify-Hmac-Sha256": "kBdgJ2cqldYo4EO+sHEGUeneguxuTFxzCS9vWJzLB1U=",
+    "X-Shopify-Product-Id": "10340678537",
+    "X-Shopify-Topic": "products/create"
+  },
+  "httpMethod": "POST",
+  "isBase64Encoded": false,
+  "path": "/webhook",
+  "pathParameters": null,
+  "queryStringParameters": null,
+  "requestContext": {
+    "httpMethod": "POST",
+    "identity": {
+      "accessKey": null,
+      "accountId": null,
+      "apiKey": "",
+      "caller": null,
+      "cognitoAuthenticationProvider": null,
+      "cognitoAuthenticationType": null,
+      "cognitoIdentityId": null,
+      "cognitoIdentityPoolId": null,
+      "sourceIp": "23.227.37.100",
+      "user": null,
+      "userAgent": "Ruby",
+      "userArn": null
+    },
+    "path": "/dev/webhook",
+    "resourcePath": "/webhook",
+    "stage": "dev"
+  },
+  "resource": "/webhook",
+  "stageVariables": null
+}
