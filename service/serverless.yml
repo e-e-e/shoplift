@@ -4,6 +4,11 @@ service: shoplift
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+custom:
+  requestsTable: requestsTable
+  sqsTable: queueInfoTable
+  sqs: messages.fifo
+
 provider:
   name: aws
   runtime: nodejs6.10
@@ -16,7 +21,9 @@ provider:
     SHOPIFY_APIKEY: ${file(../config.json):apiKey}
     SHOPIFY_PASSWORD: ${file(../config.json):password}
     SHOPIFY_SECRET: ${file(../config.json):secret}
-    DYNAMODB_REQTABLE: 'requestsTable'
+    DYNAMODB_REQTABLE: ${self:custom.requestsTable}
+    DYNAMODB_QUEUE_TABLE: ${self:custom.sqsTable}
+    SQS_QUEUE: ${self:custom.sqs}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -27,6 +34,11 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_REQTABLE}"
+    - Effect: Allow
+      Action:
+        - sqs:DeleteMessage
+        - sqs:ReceiveMessage
+      Resource: arn:aws:sqs:*:*:${self:custom.sqs}
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
 #    - Effect: "Allow"
@@ -47,16 +59,17 @@ provider:
 #  environment:
 #    variable1: value1
 
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
-
 functions:
+  apiWorker:
+    handler: apiWorker.worker
+    memorySize: 128
+    timeout: 50
+  addTestMessages:
+    handler: apiWorker.addTestMessages
+    memorySize: 128
+  clearWorkingFlag:
+    handler: apiWorker.clearWorkingFlag
+    memorySize: 128
 
   shopifyWebhook:
     handler: handler.shopifyWebhook
@@ -96,15 +109,45 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
+    Messages:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.sqs}
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        MessageRetentionPeriod: 1209600 # 14 days
+        VisibilityTimeout: 60
+        # RedrivePolicy:
+        #   deadLetterTargetArn:
+        #     Fn::GetAtt:
+        #     - MessagesDeadLetterQueue
+        #     - Arn
+        #   maxReceiveCount: 10
     requestsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.DYNAMODB_REQTABLE}
+        TableName: ${self:custom.requestsTable}
         AttributeDefinitions:
           - AttributeName: requestId
             AttributeType: S
         KeySchema:
           - AttributeName: requestId
+            KeyType: HASH
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    QueueTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.sqsTable}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
             KeyType: HASH
         TimeToLiveSpecification:
           AttributeName: ttl

@@ -17,6 +17,7 @@
   "private": true,
   "dependencies": {
     "aws-sdk": "^2.103.0",
+    "run-series": "^1.1.4",
     "shopify-api-node": "^2.8.0"
   },
   "devDependencies": {
