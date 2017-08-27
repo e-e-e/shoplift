@@ -15,6 +15,7 @@ const webhooks = [
 ]
 
 installWebhooks(webhooks)
+  .then(() => installScripts())
 
 function installWebhooks (webhooksToInstall) {
   return shopify.webhook.list()
@@ -37,6 +38,18 @@ function installWebhooks (webhooksToInstall) {
       return Promise.all(toInstall)
     })
 }
-// shopify.product.list({ limit: 5 })
-//   .then(orders => console.log(orders))
-//   .catch(err => console.error(err));
+
+function installScripts () {
+  return shopify.scriptTag.list()
+    .then((scripts) => {
+      const s = scripts.find(script => /shoplift-analytics\.js$/.test(script.src))
+      if (s) {
+        console.log('already installed', s.src)
+      } else {
+        return shopify.scriptTag.create({
+          event: 'onload',
+          src: `${serverGateway}shoplift-analytics.js`
+        })
+      }
+    })
+}

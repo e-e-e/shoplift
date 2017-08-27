@@ -1,8 +1,6 @@
 service: shoplift
 
-# You can pin your service to only deploy with a specific Serverless version
-# Check out our docs for more details
-# frameworkVersion: "=X.X.X"
+frameworkVersion: ">=1.20.0 <2.0.0"
 
 custom:
   requestsTable: requestsTable
@@ -60,17 +58,34 @@ provider:
 #    variable1: value1
 
 functions:
-  apiWorker:
-    handler: apiWorker.worker
-    memorySize: 128
-    timeout: 50
-  addTestMessages:
-    handler: apiWorker.addTestMessages
-    memorySize: 128
-  clearWorkingFlag:
-    handler: apiWorker.clearWorkingFlag
-    memorySize: 128
+  # apiWorker:
+  #   handler: apiWorker.worker
+  #   memorySize: 128
+  #   timeout: 50
+  #   iamRoleStatements:
+  #     - Effect: Allow
+  #       Action:
+  #         - dynamodb:Query
+  #         - dynamodb:Scan
+  #         - dynamodb:GetItem
+  #         - dynamodb:PutItem
+  #         - dynamodb:UpdateItem
+  #         - dynamodb:DeleteItem
+  #       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_QUEUE_TABLE}"
+  # addTestMessages:
+  #   handler: apiWorker.addTestMessages
+  #   memorySize: 128
+  # clearWorkingFlag:
+  #   handler: apiWorker.clearWorkingFlag
+  #   memorySize: 128
 
+  analytics:
+    handler: client.analytics
+    memorySize: 128
+    events:
+      - http:
+          path: shoplift-analytics.js
+          method: get
   shopifyWebhook:
     handler: handler.shopifyWebhook
     memorySize: 128
