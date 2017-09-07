@@ -1,11 +1,19 @@
 'use strict'
 
 const crypto = require('crypto')
+const parallel = require('run-parallel')
 const AWS = require('aws-sdk')
+// var sns = new AWS.SNS()
 
-const dynamoDb = new AWS.DynamoDB.DocumentClient({
+const requestTrackingTable = new AWS.DynamoDB.DocumentClient({
   params: {
     TableName: process.env.DYNAMODB_REQTABLE
+  }
+})
+
+const labourTrackingTable = new AWS.DynamoDB.DocumentClient({
+  params: {
+    TableName: process.env.DYNAMODB_LABOUR_TABLE
   }
 })
 
@@ -23,13 +31,14 @@ function constructEventId (event) {
 }
 
 module.exports.shopifyWebhook = (event, context, callback) => {
-  if (!validHmac(event)) {
+  if (!event.body || !validHmac(event)) {
     return notOk(401, 'Unauthorized')
-  };
+  }
   // check if is already processed
+  const topic = event.headers['X-Shopify-Topic']
   const requestId = constructEventId(event)
   const params = { Key: { requestId } }
-  dynamoDb.get(params, (error, result) => {
+  requestTrackingTable.get(params, (error, result) => {
     if (error) {
       return notOk(500, error)
     }
@@ -37,23 +46,39 @@ module.exports.shopifyWebhook = (event, context, callback) => {
     if (result.Item !== undefined) {
       return ok()
     }
-    dynamoDb.put({
+    parallel([trackRequest, processHook], (error) => {
+      if (error) return notOk(500, error)
+      ok()
+    })
+  })
+
+  function trackRequest (cb) {
+    requestTrackingTable.put({
       Item: {
         requestId,
         ttl: Math.floor(Date.now() / 1000) + 60
       }
-    }, (error) => {
-      if (error) return notOk(500, error)
-      // process the item
-      console.log('process item')
-      ok()
-    })
-  })
+    }, cb)
+  }
+
+  function processHook (cb) {
+    console.log('processing', topic)
+    labourTrackingTable.update({
+      Key: { topic },
+      AttributeUpdates: {
+        count: {
+          Action: 'ADD',
+          Value: 1
+        }
+      }
+    }, cb)
+  }
 
   function ok () {
     callback(null, { statusCode: 200 })
   }
   function notOk (code, reason) {
+    console.log('not cool!', reason)
     callback(null, {
       statusCode: code,
       body: JSON.stringify({ error: reason }),

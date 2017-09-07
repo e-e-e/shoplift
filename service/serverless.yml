@@ -4,6 +4,7 @@ frameworkVersion: ">=1.20.0 <2.0.0"
 
 custom:
   requestsTable: requestsTable
+  labourTable: labourTable
   sqsTable: queueInfoTable
   sqs: messages.fifo
 
@@ -21,17 +22,18 @@ provider:
     SHOPIFY_SECRET: ${file(../config.json):secret}
     DYNAMODB_REQTABLE: ${self:custom.requestsTable}
     DYNAMODB_QUEUE_TABLE: ${self:custom.sqsTable}
+    DYNAMODB_LABOUR_TABLE: ${self:custom.labourTable}
     SQS_QUEUE: ${self:custom.sqs}
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:Query
-        - dynamodb:Scan
         - dynamodb:GetItem
         - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_REQTABLE}"
+    - Effect: Allow
+      Action:
+        - dynamodb:UpdateItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_LABOUR_TABLE}"
     - Effect: Allow
       Action:
         - sqs:DeleteMessage
@@ -116,7 +118,6 @@ functions:
 #      - cognitoUserPool:
 #          pool: MyUserPool
 #          trigger: PreSignUp
-
 #    Define function environment variables here
 #    environment:
 #      variable2: value2
@@ -124,20 +125,15 @@ functions:
 # you can add CloudFormation resource templates here
 resources:
   Resources:
-    Messages:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: ${self:custom.sqs}
-        FifoQueue: true
-        ContentBasedDeduplication: true
-        MessageRetentionPeriod: 1209600 # 14 days
-        VisibilityTimeout: 60
-        # RedrivePolicy:
-        #   deadLetterTargetArn:
-        #     Fn::GetAtt:
-        #     - MessagesDeadLetterQueue
-        #     - Arn
-        #   maxReceiveCount: 10
+    # disable SQS for now
+    # Messages:
+    #   Type: AWS::SQS::Queue
+    #   Properties:
+    #     QueueName: ${self:custom.sqs}
+    #     FifoQueue: true
+    #     ContentBasedDeduplication: true
+    #     MessageRetentionPeriod: 1209600 # 14 days
+    #     VisibilityTimeout: 60
     requestsTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -152,28 +148,38 @@ resources:
           AttributeName: ttl
           Enabled: true
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    QueueTable:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+    labourTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:custom.sqsTable}
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
+        TableName: ${self:custom.labourTable}
         KeySchema:
-          - AttributeName: id
+          - AttributeName: topic
             KeyType: HASH
-        TimeToLiveSpecification:
-          AttributeName: ttl
-          Enabled: true
+        AttributeDefinitions:
+          - AttributeName: topic
+            AttributeType: S
         ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 2
+    # disable queue for now
+    # QueueTable:
+    #   Type: AWS::DynamoDB::Table
+    #   Properties:
+    #     TableName: ${self:custom.sqsTable}
+    #     AttributeDefinitions:
+    #       - AttributeName: id
+    #         AttributeType: S
+    #     KeySchema:
+    #       - AttributeName: id
+    #         KeyType: HASH
+    #     TimeToLiveSpecification:
+    #       AttributeName: ttl
+    #       Enabled: true
+    #     ProvisionedThroughput:
+    #       ReadCapacityUnits: 1
+    #       WriteCapacityUnits: 1
 #  Outputs:
 #     NewOutput:
 #       Description: "Description for the output"

@@ -1,0 +1,16 @@
+{
+  "name": "shoplift-service",
+  "version": "1.0.0",
+  "description": "the serverless service for shoplift",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "run-parallel": "^1.1.6",
+    "run-series": "^1.1.4"
+  },
+  "private": true,
+  "author": "Benjamin Forster",
+  "license": "ISC"
+}
