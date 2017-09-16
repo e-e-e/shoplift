@@ -1,7 +1,7 @@
-/* global $ d3 */
-$(document).ready(start)
+import * as d3 from 'd3'
+import $ from 'jquery'
 
-function start () {
+export default function () {
   var svgRoot
   var maskRect
   var mask
@@ -15,7 +15,7 @@ function start () {
   console.log(quotes)
   if (quotes && quotes.length > 0) {
     fadeIn()
-    $('#shoplift-svg').click(() => {
+    $('#shoplift-svg').click(function () {
       mask.selectAll('text')
         .interrupt('waiting')
         .interrupt('entering')
@@ -44,6 +44,7 @@ function start () {
         .style('width', '100%')
         .style('height', '100%')
         .style('position', 'fixed')
+        .style('z-index', '999999999')
         .style('top', '0')
         .style('left', '0')
         .style('display', 'none')
@@ -73,10 +74,14 @@ function start () {
   }
 
   function extractBlockquotes (index, blockquote) {
-    //quotes = []
     $(blockquote).children()
       .each(function (i, child) {
-        quotes.push($(child).html())
+        var html = $(child).html()
+        var broken = html.split(/<br>|<br\/>/)
+        // console.log(html, broken)
+        for (var s = 0; s < broken.length; s++) {
+          quotes.push(broken[s])
+        }
       })
       .parent()
       .remove()
@@ -133,20 +138,20 @@ function start () {
 
   function exitText (text) {
     return function () {
-      console.log('interupted')
+      // console.log('interupted')
       processNextQuote()
       text.transition()
         .duration(500)
         .style('fill', '#FFF')
         .attrTween('transform', slide(-1))
         .on('end', function () {
-          text.remove()
+          text.text(null).remove()
         })
     }
   }
 
   function slide (direction) {
-    const interp = (direction > 0) ? d3.easePolyOut : d3.easePolyOut
+    var interp = (direction > 0) ? d3.easePolyOut : d3.easePolyOut
     return function () {
       var height = $(window).height()
       return function (t) {

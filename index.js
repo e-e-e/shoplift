@@ -52,14 +52,28 @@ function installWebhooks (webhooksToInstall) {
 function installScripts () {
   return shopify.scriptTag.list()
     .then((scripts) => {
-      const s = scripts.find(script => /shoplift-analytics\.js$/.test(script.src))
+      let s = scripts.find(script => /shoplift-analytics\.js$/.test(script.src))
+      const analytics = `${serverGateway}shoplift-analytics.js`
+      console.log('trying to install', analytics)
       if (s) {
         console.log('already installed', s.src)
       } else {
         return shopify.scriptTag.create({
           event: 'onload',
-          src: `${serverGateway}shoplift-analytics.js`
+          src: analytics
         })
       }
+
+      // const d3 = `https://d3js.org/d3.v4.min.js`
+      // s = scripts.find(script => /d3\.v4\.min\.js$/.test(script.src))
+      // console.log('trying to install', d3)
+      // if (s) {
+      //   console.log('already installed', s.src)
+      // } else {
+      //   return shopify.scriptTag.create({
+      //     event: 'onload',
+      //     src: d3
+      //   })
+      // }
     })
 }
