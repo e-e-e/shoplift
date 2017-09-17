@@ -5,14 +5,21 @@ export default function () {
   var svgRoot
   var maskRect
   var mask
+  var minWidth = 320
+  var maxWidth = 1024
+  var minFontSize = 34
+  var maxFontSize = 78
   var letterSpacing = 8
   var padding = 5
   var quotes = []
+  var cachedWidth = $(window).width()
+  var cachedTextWidth
+  var cachedFontSize
 
   buildSvg()
 
   $('blockquote').each(extractBlockquotes)
-  console.log(quotes)
+  // console.log(quotes)
   if (quotes && quotes.length > 0) {
     fadeIn()
     $('#shoplift-svg').click(function () {
@@ -59,16 +66,35 @@ export default function () {
     }
   }
 
+  function calcTextWidth () {
+    var width = $(window).width()
+    if (!cachedTextWidth || width !== cachedTextWidth) {
+      cachedTextWidth = width * ((100 - (padding * 2)) / 100)
+    }
+    return cachedTextWidth
+  }
+
+  function getFontSize () {
+    var width = $(window).width()
+    if (!cachedFontSize || cachedWidth !== width) {
+      cachedWidth = width
+      var ratio = ((width - minWidth) / (maxWidth - minWidth))
+      if (ratio > 1) ratio = 1
+      if (ratio < 0) ratio = 0
+      cachedFontSize = minFontSize + ((maxFontSize - minFontSize) * ratio)
+    }
+    return cachedFontSize
+  }
+
   function appendTextElement () {
     return mask.append('text')
-      // .attr('id', 'shoplift-text')
       .attr('x', padding + '%')
       .attr('y', '20%')
       .text(null)
       .style('font-family', 'sans-serif')
       .style('letter-spacing', letterSpacing + 'px')
       .style('fill', '#000')
-      .style('font-size', '5.2em')
+      .style('font-size', getFontSize() + 'px')
       .style('font-weight', '900')
       .style('text-transform', 'uppercase')
   }
@@ -80,7 +106,7 @@ export default function () {
         var broken = html.split(/<br>|<br\/>/)
         // console.log(html, broken)
         for (var s = 0; s < broken.length; s++) {
-          quotes.push(broken[s])
+          quotes.push(broken[s].trim())
         }
       })
       .parent()
@@ -89,7 +115,7 @@ export default function () {
 
   function fadeIn () {
     svgRoot.style('display', 'initial')
-    // wrap(calcTextWidth())
+
     maskRect
       .transition()
       .delay(1000)
@@ -101,7 +127,7 @@ export default function () {
   }
 
   function fadeOut () {
-    // wrap(calcTextWidth())
+    svgRoot.style('pointer-events', 'none')
     maskRect
       .transition()
       .duration(5000)
@@ -115,12 +141,13 @@ export default function () {
   function processNextQuote () {
     var quote = quotes.shift()
     if (quote !== undefined) {
-      console.log('quotes', quote)
+      // console.log('--------', quote)
       // hide text
       var text = appendTextElement()
       var exitFn = exitText(text)
       // calculate fit
       var wordCount = wrapping(text, quote, calcTextWidth())
+
       text.style('fill', '#FFF')
         .transition('entering')
         .duration(500)
@@ -130,7 +157,6 @@ export default function () {
         .transition('waiting')
         .duration(340 * wordCount)
         .on('end interrupt', exitFn)
-        // .on('', exitFn)
     } else {
       fadeOut()
     }
@@ -138,7 +164,6 @@ export default function () {
 
   function exitText (text) {
     return function () {
-      // console.log('interupted')
       processNextQuote()
       text.transition()
         .duration(500)
@@ -164,10 +189,6 @@ export default function () {
         return 'translate(0 , ' + (value * height) + ')'
       }
     }
-  }
-
-  function calcTextWidth () {
-    return $(window).width() * ((100 - (padding * 2)) / 100)
   }
 
   function wrapping (text, quote, width) {
