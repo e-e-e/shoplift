@@ -4,20 +4,21 @@ import commonjs from 'rollup-plugin-commonjs'
 import uglify from 'rollup-plugin-uglify'
 
 process.chdir(__dirname)
+const output = (process.env.NODE_ENV === 'production') ? 'bundle.min.js' : 'bundle.js'
 
 export default {
   input: './src/index.js',
   plugins: [
     resolve(),
     commonjs(),
-    uglify()
+    (process.env.NODE_ENV === 'production') ? uglify(): false,
   ],
   globals: {
-    jquery: '$',
+    jquery: '$'
   },
   external: ['jquery'],
   output: {
-    file: 'dist/bundle.js',
+    file: `./dist/${output}`,
     name: 'bundle',
     format: 'iife'
   }

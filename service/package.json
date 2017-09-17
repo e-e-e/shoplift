@@ -4,7 +4,8 @@
   "description": "the serverless service for shoplift",
   "main": "",
   "scripts": {
-    "build:client-scripts": "rollup --config client/rollup.config.js",
+    "build:client-scripts": "NODE_ENV=production rollup --config client/rollup.config.js",
+    "dev:client-scripts": "NODE_ENV=development rollup -w --config client/rollup.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

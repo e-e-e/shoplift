@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 module.exports.analytics = (event, context, callback) => {
-  const js = fs.readFileSync(`${__dirname}/client/dist/bundle.js`)
+  const js = fs.readFileSync(`${__dirname}/client/dist/bundle.min.js`)
   const response = {
     statusCode: 200,
     headers: {
