@@ -1,5 +1,6 @@
 import addDefaultProduct from './add-default-product'
-import animateBlockquotes from './animate-blockquotes'
+// import animateBlockquotes from './animate-blockquotes'
+import boringBlockquotes from './boring-blockquotes'
 
 addDefaultProduct()
-animateBlockquotes()
+boringBlockquotes()

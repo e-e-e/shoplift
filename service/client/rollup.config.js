@@ -11,7 +11,7 @@ export default {
   plugins: [
     resolve(),
     commonjs(),
-    (process.env.NODE_ENV === 'production') ? uglify(): false,
+    (process.env.NODE_ENV === 'production') ? uglify() : false
   ],
   globals: {
     jquery: '$'

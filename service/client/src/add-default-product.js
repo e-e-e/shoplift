@@ -12,7 +12,6 @@ export default function () {
   })
 
   function gotCart (cart) {
-    console.log('cart:', cart)
     if (cart.items.length === 0) {
       addDefaultProduct()
     }
